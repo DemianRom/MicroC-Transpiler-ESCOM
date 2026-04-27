@@ -1,4 +1,22 @@
-"""Interfaz gráfica educativa para visualizar el pipeline del transpilador."""
+"""Proyecto Final de Compiladores - GUI Visualizer.
+
+Descripcion breve:
+    Este modulo implementa la interfaz grafica educativa con tkinter para
+    animar las tres fases del compilador (Lexer, Parser y Generator) y
+    visualizar el pipeline de forma transparente.
+
+Profesor: JOSE SANCHEZ JUAREZ
+Grupo: 5cm3
+Hecho por los alumnos:
+    - Demian Romero Bautista
+    - Daniel Peredo Borgonio
+    - Luca Alexander Bárcenas Pineda
+
+Autores de esta pieza:
+    - Demian Romero Bautista
+    - Daniel Peredo Borgonio
+    - Luca Alexander Bárcenas Pineda
+"""
 
 from __future__ import annotations
 

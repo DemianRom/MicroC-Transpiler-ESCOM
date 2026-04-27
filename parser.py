@@ -1,4 +1,19 @@
-"""Analizador sintáctico recursivo descendente para Micro C."""
+"""Proyecto Final de Compiladores - Analisis Sintactico (Parser).
+
+Descripcion breve:
+    Este modulo implementa un parser recursivo descendente para Micro C,
+    valida la estructura del programa y construye el AST del lenguaje.
+
+Profesor: JOSE SANCHEZ JUAREZ
+Grupo: 5cm3
+Hecho por los alumnos:
+    - Demian Romero Bautista
+    - Daniel Peredo Borgonio
+    - Luca Alexander Bárcenas Pineda
+
+Autor de esta pieza:
+    - Demian Romero Bautista (analisis sintactico)
+"""
 
 from __future__ import annotations
 
@@ -63,6 +78,13 @@ class Return:
 
 
 @dataclass(slots=True)
+class Print:
+    """Representa una sentencia print para depuracion/salida educativa."""
+
+    valor: "Expresion"
+
+
+@dataclass(slots=True)
 class OperacionBinaria:
     """Representa una operación binaria entre dos expresiones."""
 
@@ -86,7 +108,7 @@ class Identificador:
 
 
 Expresion: TypeAlias = OperacionBinaria | LiteralEntero | Identificador
-Sentencia: TypeAlias = Asignacion | While | If | Return | Bloque
+Sentencia: TypeAlias = Asignacion | While | If | Return | Print | Bloque
 
 
 class ErrorSintactico(Exception):
@@ -177,6 +199,8 @@ class Parser:
                 return self.parsear_si()
             case TipoToken.PALABRA_RETURN:
                 return self.parsear_retorno()
+            case TipoToken.PALABRA_PRINT:
+                return self.parsear_print()
             case TipoToken.LLAVE_IZQUIERDA:
                 return self.parsear_bloque()
             case _:
@@ -256,6 +280,15 @@ class Parser:
         valor: Expresion = self.parsear_expresion()
         self.match(TipoToken.PUNTO_Y_COMA)
         return Return(valor=valor)
+
+    def parsear_print(self) -> Print:
+        """Regla: print -> 'print' '(' expresion ')' ';'."""
+        self.match(TipoToken.PALABRA_PRINT)
+        self.match(TipoToken.PARENTESIS_IZQUIERDO)
+        valor: Expresion = self.parsear_expresion()
+        self.match(TipoToken.PARENTESIS_DERECHO)
+        self.match(TipoToken.PUNTO_Y_COMA)
+        return Print(valor=valor)
 
     def parsear_expresion(self) -> Expresion:
         """Regla inicial de expresiones con menor precedencia."""

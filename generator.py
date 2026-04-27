@@ -1,4 +1,19 @@
-"""Traductor de AST Micro C a código Python."""
+"""Proyecto Final de Compiladores - Generador de Codigo.
+
+Descripcion breve:
+    Este modulo recorre el AST de Micro C y genera codigo Python equivalente
+    usando un recorrido tipo Visitor con control explicito de indentacion.
+
+Profesor: JOSE SANCHEZ JUAREZ
+Grupo: 5cm3
+Hecho por los alumnos:
+    - Demian Romero Bautista
+    - Daniel Peredo Borgonio
+    - Luca Alexander Bárcenas Pineda
+
+Autor de esta pieza:
+    - Luca Alexander Bárcenas Pineda (generador)
+"""
 
 from __future__ import annotations
 
@@ -13,6 +28,7 @@ from parser import (
     LiteralEntero,
     NodoMain,
     OperacionBinaria,
+    Print,
     Programa,
     Return,
     Sentencia,
@@ -65,6 +81,9 @@ class GeneradorPython:
                 return None
             case Return():
                 self._visitar_return(nodo)
+                return None
+            case Print():
+                self._visitar_print(nodo)
                 return None
             case OperacionBinaria():
                 return self._visitar_operacion_binaria(nodo)
@@ -166,10 +185,20 @@ class GeneradorPython:
         valor_traducido: str = self._generar_expresion(nodo.valor)
         self._agregar_linea(f"return {valor_traducido}")
 
+    def _visitar_print(self, nodo: Print) -> None:
+        """Traduce la sentencia print del lenguaje Micro C a Python."""
+        valor_traducido: str = self._generar_expresion(nodo.valor)
+        self._agregar_linea(f"print({valor_traducido})")
+
     def _visitar_operacion_binaria(self, nodo: OperacionBinaria) -> str:
         """Traduce una operación binaria envolviendo en paréntesis para seguridad."""
         izquierda: str = self._generar_expresion(nodo.izquierda)
         derecha: str = self._generar_expresion(nodo.derecha)
+
+        # Micro C trabaja con enteros: la división debe truncar hacia cero (estilo C).
+        if nodo.operador == TipoToken.DIVISION:
+            return f"int(({izquierda}) / ({derecha}))"
+
         operador_python: str = self._traducir_operador(nodo.operador)
         return f"({izquierda} {operador_python} {derecha})"
 

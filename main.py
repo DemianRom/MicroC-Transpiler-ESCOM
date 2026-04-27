@@ -1,4 +1,16 @@
-"""Orquestador CLI del transpilador de Micro C a Python."""
+"""Proyecto Final de Compiladores - Orquestador CLI.
+
+Descripcion breve:
+    Este modulo conecta las fases del compilador (lexer, parser y generador),
+    maneja entradas/salidas de archivo y lanza la GUI de visualizacion.
+
+Profesor: JOSE SANCHEZ JUAREZ
+Grupo: 5cm3
+Hecho por los alumnos:
+    - Demian Romero Bautista
+    - Daniel Peredo Borgonio
+    - Luca Alexander Bárcenas Pineda
+"""
 
 from __future__ import annotations
 

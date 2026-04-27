@@ -1,29 +1,41 @@
-# Transpilador Micro C -> Python (Proyecto Final Compiladores)
+# Transpilador Micro C -> Python
 
-Proyecto academico desarrollado de forma artesanal en Python 3.10+ para transcompilar un subconjunto de C ("Micro C") hacia Python.
+Proyecto final de Compiladores implementado de forma manual en Python 3.10+.
+Descripcion breve:
+Proyecto educativo que transpila un subconjunto de C (Micro C) a Python y
+permite visualizar las 3 fases del proceso (Lexer, Parser y Generator).
 
-El proyecto incluye:
-- Pipeline completo de compilacion: Lexer -> Parser -> Generator.
-- Interfaz GUI educativa para visualizar las 3 fases paso a paso.
-- Generacion automatica de artefactos `.lex`, `.ast` y `.py`.
+Profesor: JOSE SANCHEZ JUAREZ
+Grupo: 5cm3
+Hecho por los alumnos:
+- Demian Romero Bautista
+- Daniel Peredo Borgonio
+- Luca Alexander Bárcenas Pineda
 
-## Integrantes
-- Demian
-- Daniel
-- Luca
+Este repositorio contiene un transpilador educativo de Micro C a Python con:
+- Analisis lexico manual
+- Parser recursivo descendente con manejo de precedencia
+- Generador de codigo estilo Visitor.
+- GUI para visualizar las 3 fases del pipeline.
 
-## Objetivo
-Implementar un compilador/transpilador modular, claro y didactico, sin dependencias externas de analisis lexico/sintactico.
+## Estado del proyecto
 
-## Restricciones de implementacion
+El proyecto esta funcional para exposicion y demostracion de pipeline completo:
+1. Lexer -> tokens.
+2. Parser -> AST.
+3. Generator -> Python.
+
+Ademas genera artefactos de salida en disco y permite visualizacion paso a paso en GUI.
+
+## Restricciones de implementacion cumplidas
 - No se usa `re`.
-- No se usan generadores de parser (PLY, Lark, ANTLR, etc.).
-- Todo el analisis lexico y sintactico se implementa manualmente.
+- No se usan generadores de parser externos.
+- Todo el procesamiento se hace con logica manual en Python.
 
 ## Especificacion de Micro C soportada
 
-### Estructura obligatoria del programa
-Todo programa debe estar envuelto en la funcion principal:
+### Estructura obligatoria
+Todo programa debe tener esta forma:
 
 ```c
 int main() {
@@ -37,108 +49,90 @@ int main() {
 - `else`
 - `while`
 - `return`
+- `print` (extension educativa agregada)
 
-### Operadores matematicos
-- `+`
-- `-`
-- `*`
-- `/`
-
-### Operadores relacionales / igualdad
-- `<`
-- `>`
-- `<=`
-- `>=`
-- `==`
-- `!=`
-
-### Asignacion
-- `=`
+### Operadores
+- Matematicos: `+`, `-`, `*`, `/`
+- Relacionales: `<`, `>`, `<=`, `>=`, `==`, `!=`
+- Asignacion: `=`
 
 ### Simbolos
-- `{`
-- `}`
-- `(`
-- `)`
-- `;`
+- `{`, `}`, `(`, `)`, `;`
 
-## Arquitectura del proyecto
+### Comentarios
+- `// comentario de linea` (extension agregada)
 
-### 1) `tokens.py`
-Define:
-- `TipoToken` (enum de tokens del lenguaje)
-- `Token` (dataclass con `tipo`, `lexema`, `linea`, `columna`)
+## Extensiones agregadas para la demo
 
-### 2) `lexer.py` (Analizador lexico manual)
-Responsabilidades:
-- Recorrer el texto caracter por caracter (`self.pos`, `self.char_actual`).
-- Identificar tokens de palabras clave, identificadores, numeros, operadores y simbolos.
-- Reportar errores lexicos con linea y columna.
+Se agregaron 3 mejoras clave para fortalecer la exposicion:
 
-Salida:
-- Lista secuencial de `Token`.
+1. `print(...)` en Micro C
+- Se reconoce como token reservado.
+- Parser soporta `print(expresion);`.
+- Generator produce `print(...)` en Python.
 
-### 3) `parser.py` (Recursivo descendente + AST)
-Responsabilidades:
-- Consumir la lista de tokens con `match(tipo_esperado)`.
-- Validar la estructura obligatoria `int main() { ... }`.
-- Construir AST con `@dataclass`.
+2. Comentarios `//`
+- Lexer ignora comentarios de linea completos.
+- Ya no rompen el parseo ni la transpilacion.
 
-Nodos principales:
-- `Programa`
-- `NodoMain`
-- `Bloque`
-- `Asignacion`
-- `While`
-- `If`
-- `Return`
-- `OperacionBinaria`
-- `LiteralEntero`
-- `Identificador`
+3. Division entera estilo C
+- En C con enteros, `a / b` trunca hacia cero.
+- El generator transpila division como `int(a / b)` para aproximar ese comportamiento.
+- Ejemplo:
+  - `5 / 2` -> `2`
+  - `-5 / 2` -> `-2`
 
-Precedencia implementada:
-1. Unario (`-x`)
-2. Multiplicacion/Division (`*`, `/`)
-3. Suma/Resta (`+`, `-`)
-4. Comparaciones (`<`, `>`, `<=`, `>=`)
-5. Igualdad (`==`, `!=`)
+## Arquitectura modular
 
-### 4) `generator.py` (Back-end Python, estilo Visitor)
-Responsabilidades:
-- Recorrer AST con `match-case`.
-- Traducir sentencias/expresiones a Python.
-- Controlar rigurosamente la indentacion (4 espacios por nivel).
+### `tokens.py`
+- Define `TipoToken` y `Token`.
+- Centraliza el vocabulario del lenguaje.
+- Desarrollado por: Daniel Peredo Borgonio.
 
-Salida Python:
-- Funcion `def main():`
-- Bloque final:
+### `lexer.py`
+- Recorre el codigo caracter por caracter (`self.pos`, `self.char_actual`).
+- Construye tokens y reporta errores con linea/columna.
+- Ignora espacios y comentarios `//`.
+- Desarrollado por: Daniel Peredo Borgonio.
 
-```python
-if __name__ == "__main__":
-    main()
-```
+### `parser.py`
+- Consume tokens con `match(tipo_esperado)`.
+- Valida `int main() { ... }`.
+- Construye AST con `@dataclass`.
+- Precedencia implementada:
+  1. Unario
+  2. Multiplicacion/Division
+  3. Suma/Resta
+  4. Comparaciones
+  5. Igualdad
+- Desarrollado por: Demian Romero Bautista.
 
-### 5) `main.py` (Orquestador CLI)
-Responsabilidades:
-- Leer archivo de entrada (`.uc` o `.mc`).
-- Ejecutar pipeline Lexer -> Parser -> Generator.
-- Guardar salidas en carpeta `output/`.
-- Manejar errores de forma amigable.
-- Abrir la GUI educativa al finalizar compilacion exitosa.
+### `generator.py`
+- Recorre AST con `match-case`.
+- Controla indentacion de Python (4 espacios por nivel).
+- Emite:
+  - `def main():`
+  - `if __name__ == "__main__": main()`
+- Desarrollado por: Luca Alexander Bárcenas Pineda.
 
-### 6) `gui_visualizer.py` (Visualizador educativo)
-Muestra de forma animada:
-1. Fase Lexer: tokens uno por uno.
-2. Fase Parser: arbol AST linea por linea.
-3. Fase Generator: codigo Python generado linea por linea.
+### `main.py`
+- Orquesta CLI: leer archivo -> lexer -> parser -> generator.
+- Guarda salidas en carpeta `output/`.
+- Maneja errores amigables.
+- Abre GUI automaticamente tras compilacion exitosa.
 
-Caracteristicas:
-- Animacion no bloqueante con `after()`.
-- Slider de velocidad.
-- Auto-scroll en los paneles (`see(tk.END)`).
-- Compilacion en background para no congelar la UI.
+### `gui_visualizer.py`
+- Visualiza animado:
+  1. Tokens
+  2. AST
+  3. Codigo Python generado
+- Usa `after()` (no bloqueante), slider de velocidad y auto-scroll.
+- Desarrollado en conjunto por:
+  - Demian Romero Bautista
+  - Daniel Peredo Borgonio
+  - Luca Alexander Bárcenas Pineda
 
-## Estructura de carpetas (esperada)
+## Estructura del proyecto
 
 ```text
 Proyecto_final/
@@ -152,74 +146,88 @@ Proyecto_final/
   .gitignore
   ap/
     prueba1.uc
-  output/                # se crea automaticamente
+  output/                  # se crea automaticamente
 ```
 
 ## Requisitos
-- Python 3.10 o superior.
+- Python 3.10 o superior
 
-### Opcion 1: Compilar desde CLI (recomendado)
+## Ejecucion
 
+### Compilar por CLI (recomendado)
 ```bash
 python main.py ruta/al/archivo.uc
 ```
-
 o
-
 ```bash
 python main.py ruta/al/archivo.mc
 ```
 
-Tambien puedes pasar `-o`, pero por diseno se normaliza a carpeta `output/`:
+Nota: `-o/--salida` se acepta por compatibilidad, pero la salida se normaliza a `output/salida_<nombre>.py`.
 
-```bash
-python main.py ruta/al/archivo.uc -o salida.py
-```
-
-### Opcion 2: Abrir solo visualizador GUI
-
+### Abrir solo GUI
 ```bash
 python gui_visualizer.py
 ```
 
-## Archivos de salida generados
+## Archivos de salida
 
-Siempre en carpeta `output/` (si no existe, se crea):
+Para un archivo `programa.uc`, se generan:
+- `output/programa.lex`
+- `output/programa.ast`
+- `output/salida_programa.py`
 
-Para entrada `programa.uc`:
-- `output/programa.lex`   -> tokens
-- `output/programa.ast`   -> AST formateado
-- `output/salida_programa.py` -> codigo Python final
+## Flujo interno
+1. Lectura de fuente.
+2. Tokenizacion.
+3. Parseo y AST.
+4. Generacion Python.
+5. Escritura de artefactos.
+6. (CLI) Apertura de GUI.
 
-## Flujo interno de compilacion
-1. Lectura de archivo fuente.
-2. Tokenizacion con `Lexer`.
-3. Parsing y construccion de AST con `Parser`.
-4. Generacion de Python con `GeneradorPython`.
-5. Escritura de artefactos a `output/`.
-6. (CLI) Apertura de GUI para visualizacion educativa.
+## Ejemplo completo
 
-## Manejo de errores
-- Error lexico: caracter invalido, token no reconocido.
-- Error sintactico: estructura incorrecta o tokens fuera de regla.
-- Error de generacion: nodo/operador AST no soportado.
-- Error de E/S: ruta invalida, permisos, archivo inexistente.
-
-Todos los errores se reportan con mensajes legibles, evitando traceback crudo en uso normal.
-
-## Ejemplo minimo valido en Micro C
-
+### Entrada Micro C
 ```c
 int main() {
-    int x = 0;
-    while (x < 3) {
-        x = x + 1;
-    }
-    return x;
+    int a = 10;
+    int b = 20;
+    int suma = a + b;
+    print(suma); // salida educativa
+    print(-5 / 2);
+    return 0;
 }
 ```
 
-## Valor academico del proyecto
-- Demuestra separacion de responsabilidades por fases de compilacion.
-- Permite depuracion visual y explicacion pedagogica en exposicion.
-- Facilita extension futura del lenguaje (nuevos tokens/reglas/nodos).
+### Salida Python esperada
+```python
+def main():
+    a = 10
+    b = 20
+    suma = (a + b)
+    print(suma)
+    print(int(((0 - 5)) / (2)))
+    return 0
+
+if __name__ == "__main__":
+    main()
+```
+
+## Manejo de errores
+- Lexico: caracter no reconocido.
+- Sintactico: estructura o tokens invalidos.
+- Generacion: nodo/operador no soportado.
+- E/S: archivo inexistente, permisos o ruta invalida.
+
+Los mensajes se muestran en formato legible para evitar traceback crudo en uso normal.
+
+## Limitaciones conocidas (actuales)
+- No hay literales string (ejemplo: `print("hola")` no esta soportado).
+- No hay comentarios de bloque `/* ... */`.
+- No hay funciones adicionales aparte de `main`.
+- No hay chequeo semantico de tipos/variables (solo sintaxis y generacion).
+
+## Valor academico
+- Demuestra separacion de responsabilidades por fases.
+- Facilita explicacion visual del proceso de compilacion.
+- Permite extensiones futuras de manera ordenada.

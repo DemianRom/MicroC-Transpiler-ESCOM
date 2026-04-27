@@ -1,4 +1,20 @@
-"""Analizador léxico manual para Micro C sin expresiones regulares."""
+"""Proyecto Final de Compiladores - Analizador Lexico Manual.
+
+Descripcion breve:
+    Este modulo implementa el lexer de Micro C caracter por caracter.
+    Convierte el codigo fuente en una secuencia de tokens sin usar
+    expresiones regulares ni herramientas externas.
+
+Profesor: JOSE SANCHEZ JUAREZ
+Grupo: 5cm3
+Hecho por los alumnos:
+    - Demian Romero Bautista
+    - Daniel Peredo Borgonio
+    - Luca Alexander Bárcenas Pineda
+
+Autor de esta pieza:
+    - Daniel Peredo Borgonio (lexer)
+"""
 
 from __future__ import annotations
 
@@ -57,6 +73,11 @@ class Lexer:
     def saltar_espacios(self) -> None:
         """Consume espacios, tabulaciones y saltos de línea."""
         while self.char_actual in {" ", "\t", "\r", "\n"}:
+            self.avanzar()
+
+    def saltar_comentario_linea(self) -> None:
+        """Consume un comentario de línea iniciado por // hasta fin de línea."""
+        while self.char_actual not in {"\n", self._CARACTER_NULO}:
             self.avanzar()
 
     def procesar_numero(self) -> Token:
@@ -171,6 +192,11 @@ class Lexer:
         while self.char_actual != self._CARACTER_NULO:
             if self.char_actual in {" ", "\t", "\r", "\n"}:
                 self.saltar_espacios()
+                continue
+
+            if self.char_actual == "/" and self.mirar_siguiente() == "/":
+                # Se ignora el comentario completo y se continúa tokenizando.
+                self.saltar_comentario_linea()
                 continue
 
             if self.char_actual.isdigit():

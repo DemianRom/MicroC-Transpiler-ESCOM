@@ -1,4 +1,19 @@
-"""Definiciones de tokens para el lenguaje Micro C."""
+"""Proyecto Final de Compiladores - Definiciones de Tokens.
+
+Descripcion breve:
+    Este modulo define el vocabulario lexico de Micro C (tipos de token,
+    palabras reservadas y estructura Token) para ser consumido por el lexer.
+
+Profesor: JOSE SANCHEZ JUAREZ
+Grupo: 5cm3
+Hecho por los alumnos:
+    - Demian Romero Bautista
+    - Daniel Peredo Borgonio
+    - Luca Alexander Bárcenas Pineda
+
+Autor de esta pieza:
+    - Daniel Peredo Borgonio (tokens)
+"""
 
 from __future__ import annotations
 
@@ -17,6 +32,7 @@ class TipoToken(str, Enum):
     PALABRA_ELSE = "PALABRA_ELSE"
     PALABRA_WHILE = "PALABRA_WHILE"
     PALABRA_RETURN = "PALABRA_RETURN"
+    PALABRA_PRINT = "PALABRA_PRINT"
 
     MAS = "MAS"
     MENOS = "MENOS"
@@ -45,6 +61,7 @@ PALABRAS_RESERVADAS: dict[str, TipoToken] = {
     "else": TipoToken.PALABRA_ELSE,
     "while": TipoToken.PALABRA_WHILE,
     "return": TipoToken.PALABRA_RETURN,
+    "print": TipoToken.PALABRA_PRINT,
 }
 
 

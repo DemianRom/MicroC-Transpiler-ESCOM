@@ -7,8 +7,5 @@ def main():
         contador = (contador + 1)
     return resultado
 
-
-
 if __name__ == "__main__":
     main()
-    
